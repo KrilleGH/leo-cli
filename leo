@@ -1,43 +1,54 @@
 #!/usr/bin/env python3
-
-import sys
+import sys, argparse, fcntl, termios, struct
+import xml.etree.ElementTree as ET
 import requests
-from bs4 import BeautifulSoup
 
-COUNTRY_CODES = ['en', 'fr', 'es', 'it', 'ch', 'ru']
-URL = """http://dict.leo.org/%(lang)s?lp=%(lang)s&searchLoc=0&cmpType=relaxed&sectHdr=on&spellToler=&search=%(word)s"""
+terminal_height, terminal_width, hp, wp = struct.unpack("HHHH",
+        fcntl.ioctl(0, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0)))
 
-lang = 'en'  # language
-help_text = """Usage leo [language] phrase1 [phrase2] [phrase3] ...\n\n
-    \t language can be one of en, fr, es."""
+parser = argparse.ArgumentParser(description="dict.leo.org CLI")
+parser.add_argument("word", metavar="WORD", nargs=1,
+        help="a string to lookup in dictionary")
+parser.add_argument("-t","--trans","--translation", default="ende",
+        metavar="TRANSLATION", help="Translation (e.g. ende, esde)")
+parser.add_argument("-a", action="store_true", dest="show_add",
+        help="Show additional matches")
+args = parser.parse_args()
 
-def translate(word, lang):
-    lang = "%sde" % lang
-    url = URL % {
-        'lang': lang,
-        'word': word
-    }
-    r = requests.get(url)
+r = requests.get(
+        "http://dict.leo.org/dictQuery/m-vocab/{translation}/query.xml".format(translation=args.trans),
+        params={"lp":args.trans, "search":args.word})
 
-    soup = BeautifulSoup(r.text)
-    results = soup.find(id='results')
-    if results:
-        trs = results.find_all('tr', valign='top')
-        results_origin = [tr.find_all('td')[1].get_text() for tr in trs]
-        results_translation = [tr.find_all('td')[3].get_text() for tr in trs]
-        return list(zip(results_origin, results_translation))
+if r.status_code != 200:
+    print("Error: {code}".format(code=r.status_code))
+    sys.exit(1)
 
-if len(sys.argv) > 1 and sys.argv[1] in COUNTRY_CODES:
-    lang = sys.argv[1]
+def textvalue(element):
+    return " ".join(element.itertext())
 
-phrases = [arg for arg in sys.argv[1:] if arg not in COUNTRY_CODES]
+def print_header(text,symbol):
+    w = terminal_width - len(text) - 2
+    print("{border} {text}{extra} {border}".format(border="".join([symbol]*int(w/2)),
+                extra=[""," "][w%2],
+                text=text))
 
-translations = {word: translate(word, lang) for word in phrases}
-for word in translations:
-    if len(translations) > 1:
-        print('%s:' % word)
-    if translations[word]:
-        for trans in translations[word]:
-            print('%s\t\t%s' % trans)
-    else:
-        print('\tno translation found...')
+def print_left_right(left,right):
+    w = terminal_width - 1
+    wl, wr = int(w/2)-len(left), int(w/2)-len(right)
+
+    print("{left}{spaceL}|{extra}{spaceR}{right}".format(left=left,
+                spaceL=" "*int(wl),
+                extra=[""," "][w%2],
+                spaceR=" "*int(wr),
+                right=right))
+
+for part in ET.fromstring(r.content).findall("part"):
+    if part.get("direct") != "1" and not args.show_add:
+        continue
+    print_header(part.get("title"), "=")
+    for section in part.findall("section"):
+        print_header(section.get("sctTitle"),"-")
+        for entry in section.findall("entry"):
+            left = textvalue( entry.findall("side")[0].find("repr"))
+            right = textvalue( entry.findall("side")[1].find("repr"))
+            print_left_right(left,right)
