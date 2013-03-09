@@ -9,16 +9,26 @@ leo-cli is a command line tool which can be used to translate words or phrases f
 
 ##Installation
 ===================
-This tool requires beatiful soup and the wonderful requests library.
-###install beautifulsoup and requests
-pip install beautifulsoup4 requests
+This tool requires the wonderful requests library.
+###install requests
+pip install requests
 
 ###install leo-cli
 pip install leo-cli
 
 ##usage:
 ===================
-leo example
 
-leo another example
+    usage: leo [-h] [-t TRANSLATION] [-a] WORD
+
+    dict.leo.org CLI
+
+    positional arguments:
+      WORD                  a string to lookup in dictionary
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -t TRANSLATION, --trans TRANSLATION, --translation TRANSLATION
+                            Translation (e.g. ende, esde)
+      -a                    Show additional matches
 
