@@ -16,6 +16,8 @@ pip install requests
 ###install leo-cli
 pip install leo-cli
 
+This package collides with https://github.com/JoiDegn/leo-cli/
+
 ##usage:
 ===================
 
@@ -30,5 +32,7 @@ pip install leo-cli
       -h, --help            show this help message and exit
       -t TRANSLATION, --trans TRANSLATION, --translation TRANSLATION
                             Translation (e.g. ende, esde)
+      -l LANGUAGE-CODE, --lang LANGUAGE-CODE
+                            Interface language (eg. de, en)
       -a                    Show additional matches
 
