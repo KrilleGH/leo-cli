@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys, argparse, fcntl, termios, struct
+from io import StringIO
 import xml.etree.ElementTree as ET
 import requests
 
@@ -42,7 +43,9 @@ def print_left_right(left,right):
                 spaceR=" "*int(wr),
                 right=right))
 
-for part in ET.fromstring(r.content).findall("part"):
+xmlsource = StringIO(r.text)
+xml = ET.parse(xmlsource, parser=ET.XMLParser(encoding="UTF-8"))
+for part in xml.findall("part"):
     if part.get("direct") != "1" and not args.show_add:
         continue
     print_header(part.get("title"), "=")
