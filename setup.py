@@ -3,13 +3,14 @@
 from distutils.core import setup
 
 setup(name='leo-cli',
-    version='0.2',
+    version='0.1',
     description='leo.org command line tool',
-    author='Johannes Degn',
-    author_email='j@degn.de',
+    author='Yves Fischer',
+    author_email='yvesf+github@xapek.org',
     license="MIT",
-    url='https://github.com/JoiDegn/leo-cli',
+    url='https://github.com/yvesf/leo-cli',
     scripts=['leo'],
+    install_requires=['requests >= 1.0.0'],
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
