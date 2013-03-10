@@ -45,8 +45,7 @@ def print_left_right(left,right):
                 spaceL=" "*int(wl), spaceR=" "*int(wr),
                 extra=[""," "][w%2]))
 
-xmlsource = StringIO(r.text)
-xml = ET.parse(xmlsource, parser=ET.XMLParser(encoding=r.encoding))
+xml = ET.fromstring(r.text)
 for part in xml.findall("part"):
     if part.get("direct") != "1" and not args.show_add:
         continue
