@@ -32,13 +32,16 @@ def print_left_right(left, right):
 def main():
     """main entry point"""
     parser = argparse.ArgumentParser(description="dict.leo.org CLI")
-    parser.add_argument("word", metavar="WORD", nargs=1,
+    parser.add_argument("word", metavar="WORD", nargs='?',
             help="a string to lookup in dictionary")
     parser.add_argument("-t", "--trans", "--translation", default="ende",
             metavar="TRANSLATION", help="Translation (eg. ende, esde)")
     parser.add_argument("-l", "--lang", default="de",
             metavar="LANGUAGE-CODE", help="Interface language (eg. de, en)")
     args = parser.parse_args()
+
+    if not args.word:
+        args.word = input("leo {0}> ".format(args.trans))
 
     url = "http://dict.leo.org/dictQuery/m-vocab/{translation}/query.xml"
     response = requests.get(url.format(translation=args.trans),
